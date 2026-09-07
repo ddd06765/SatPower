@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SatPower</title>
+<link rel="icon" type="image/png" href="{{ url_for('static', filename='img/satpower_logo.png') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+<div class="nav">
+  <img src="{{ url_for('static', filename='img/satpower_logo.png') }}" alt="SatPower" class="nav-logo">
+  <span class="brand">SatPower</span>
+  <span class="ver">v1.0</span>
+</div>
+
+<div class="hero">
+  <img src="{{ url_for('static', filename='img/satpower_logo.png') }}" alt="SatPower" class="logo">
+  <h1>SatPower</h1>
+  <h2>Plateforme IA de Correction et de Planification Orbitale</h2>
+  <p>
+    Simulation en temps réel d'un système SADA (Solar Array Drive Assembly) avec
+    correction IA, et analyse énergétique de mission calculant le budget de puissance
+    d'un satellite sur toute sa durée de vie — LEO, MEO ou GEO.
+  </p>
+</div>
+
+<div class="auth-wrap">
+  <div class="auth-card">
+    <div class="top-bar"></div>
+    <div class="tabbar">
+      <button id="tabLogin" class="active">Connexion</button>
+      <button id="tabSignup">Inscription</button>
+    </div>
+    <form id="authForm" class="auth-fields">
+      <input type="text" id="fName" class="field hidden-field" placeholder="Votre nom complet">
+      <input type="email" id="fEmail" class="field" placeholder="Email" required>
+      <input type="password" id="fPass" class="field" placeholder="Mot de passe" required>
+      <input type="password" id="fConfirm" class="field hidden-field" placeholder="Confirmer le mot de passe">
+    </form>
+    <div class="auth-msg" id="authMsg"></div>
+    <div class="auth-submit-wrap">
+      <button class="btn cyan auth-submit" id="authSubmit" type="submit" form="authForm">Se connecter</button>
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<div class="section-title">
+  <h3>Ce que fait la plateforme</h3>
+  <p>Deux sections : simulation de correction en temps réel et planification de mission</p>
+</div>
+
+<div class="feature-grid">
+  <div class="feature-card">
+    <div class="accent"></div>
+    <div class="icon">🎯</div>
+    <h4>Simulation SADA — 4 Modes</h4>
+    <p>Nominal, Positionnement, Protection et Maintien/Rattrapage — reproduit le cycle d'un contrôleur SADA embarqué.</p>
+  </div>
+  <div class="feature-card">
+    <div class="accent"></div>
+    <div class="icon">🤖</div>
+    <h4>Correction IA en Temps Réel</h4>
+    <p>Détection de perturbation et correction d'angle en ~50ms, réduisant l'erreur de pointage de plus de 90%.</p>
+  </div>
+  <div class="feature-card">
+    <div class="accent"></div>
+    <div class="icon">⚠</div>
+    <h4>Injection d'Anomalies</h4>
+    <p>Simulez une perturbation critique (+5°) à la volée pour observer la réaction du système de correction.</p>
+  </div>
+  <div class="feature-card">
+    <div class="accent"></div>
+    <div class="icon">🛰</div>
+    <h4>3 Classes d'Orbites</h4>
+    <p>LEO (Crépusculaire, Midi-Minuit, inclinaison libre), MEO et GEO — mécanique orbitale réelle.</p>
+  </div>
+  <div class="feature-card">
+    <div class="accent"></div>
+    <div class="icon">📊</div>
+    <h4>Budget de Puissance de Mission</h4>
+    <p>Énergie cumulée sur toute la durée de vie, avec et sans correction IA, dégradation des panneaux incluse.</p>
+  </div>
+  <div class="feature-card">
+    <div class="accent"></div>
+    <div class="icon">🌑</div>
+    <h4>Saisons d'Éclipse</h4>
+    <p>Fraction d'ombre orbitale calculée selon l'angle bêta et la géométrie réelle de l'orbite choisie.</p>
+  </div>
+</div>
+
+<div class="footer">SatPower — Simulation SADA &amp; Planification de Mission</div>
+
+<script>
+const tabLogin = document.getElementById('tabLogin');
+const tabSignup = document.getElementById('tabSignup');
+const fName = document.getElementById('fName');
+const fConfirm = document.getElementById('fConfirm');
+const authSubmit = document.getElementById('authSubmit');
+const authMsg = document.getElementById('authMsg');
+const authForm = document.getElementById('authForm');
+let mode = 'login';
+
+function switchMode(m){
+  mode = m;
+  tabLogin.classList.toggle('active', m==='login');
+  tabSignup.classList.toggle('active', m==='signup');
+  fName.classList.toggle('hidden-field', m!=='signup');
+  fConfirm.classList.toggle('hidden-field', m!=='signup');
+  authSubmit.textContent = m==='login' ? 'Se connecter' : 'Créer mon compte';
+  authMsg.textContent = '';
+}
+tabLogin.addEventListener('click', () => switchMode('login'));
+tabSignup.addEventListener('click', () => switchMode('signup'));
+
+authForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  authMsg.style.color = 'var(--red)';
+  const email = document.getElementById('fEmail').value.trim();
+  const password = document.getElementById('fPass').value.trim();
+
+  let url, payload;
+  if (mode === 'login') {
+    url = '/api/login';
+    payload = { email, password };
+  } else {
+    url = '/api/signup';
+    payload = {
+      name: fName.value.trim(),
+      email, password,
+      confirm: fConfirm.value.trim()
+    };
+  }
+
+  try {
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(payload)
+    });
+    const data = await res.json();
+    if (!data.ok) {
+      authMsg.textContent = data.error || "Une erreur est survenue.";
+      return;
+    }
+    authMsg.style.color = 'var(--green)';
+    authMsg.textContent = mode === 'login' ? 'Connexion réussie !' : `Compte créé ! Bienvenue ${data.nom || ''} !`;
+    setTimeout(() => { window.location.href = data.redirect; }, 400);
+  } catch (err) {
+    authMsg.textContent = "Impossible de contacter le serveur.";
+  }
+});
+</script>
+
+</body>
+</html>

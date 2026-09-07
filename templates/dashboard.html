@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SatPower — Dashboard</title>
+<link rel="icon" type="image/png" href="{{ url_for('static', filename='img/satpower_logo.png') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+<div class="topbar">
+  <img src="{{ url_for('static', filename='img/satpower_logo.png') }}" alt="SatPower" class="nav-logo">
+  <span class="brand">SatPower</span>
+  <div class="spacer"></div>
+  <span style="color:var(--muted2);font-size:12px;margin-right:14px;">{{ nom or email }}</span>
+  <a href="{{ url_for('logout') }}"><button class="btn ghost small">← Accueil</button></a>
+</div>
+
+<div class="tabbar-section">
+  <button id="tabSada" class="active sada" onclick="showSection('sada')">🛰&nbsp; Simulation SADA</button>
+  <button id="tabMission" onclick="showSection('mission')">📊&nbsp; Analyse Énergétique de Mission</button>
+</div>
+
+<!-- ═══════════════ SADA PANEL ═══════════════ -->
+<div id="panelSada" class="panel active">
+
+  <div class="panel-header">
+    <div class="bar cyan"></div>
+    <div>
+      <h2>SolarArrayDriveAssembly</h2>
+      <div class="sub">Plateforme IA de correction — Simulation Orbitale GEO</div>
+    </div>
+  </div>
+
+  <div class="control-bar">
+    <div class="top"></div>
+    <div class="row">
+      <span class="label">Simulation IA</span>
+      <button class="btn cyan small" id="btnDemo">Demarrer simulation</button>
+      <button class="btn ghost small" id="btnReset">Reinitialiser</button>
+      <button class="btn red small" id="btnInject">Injecter anomalie</button>
+      <span class="status-pill" id="statusPill">Mode simulation</span>
+    </div>
+  </div>
+
+  <div class="kpi-bar">
+    <div class="top"></div>
+    <div class="kpi-row">
+      <div class="kpi"><div class="lbl">Temps</div><div class="val" id="kTemps" style="color:var(--cyan)">--</div><div class="unit">s</div></div>
+      <div class="kpi"><div class="lbl">Angle Desire</div><div class="val" id="kDesire" style="color:var(--green)">--</div><div class="unit">deg</div></div>
+      <div class="kpi"><div class="lbl">Angle Mesure</div><div class="val" id="kMesure" style="color:var(--orange)">--</div><div class="unit">deg</div></div>
+      <div class="kpi"><div class="lbl">Perturbation</div><div class="val" id="kPerturb" style="color:var(--red)">--</div><div class="unit">deg</div></div>
+      <div class="kpi"><div class="lbl">Erreur avant</div><div class="val" id="kErrAv" style="color:var(--red)">--</div><div class="unit">deg</div></div>
+      <div class="kpi"><div class="lbl">Correction IA</div><div class="val" id="kCorr" style="color:var(--gold)">--</div><div class="unit">deg</div></div>
+      <div class="kpi"><div class="lbl">Erreur apres</div><div class="val" id="kErrAp" style="color:var(--green)">--</div><div class="unit">deg</div></div>
+      <div class="kpi"><div class="lbl">Mode</div><div class="val" id="kMode" style="color:var(--purple);font-size:12px;">--</div><div class="unit"></div></div>
+    </div>
+  </div>
+
+  <div class="main-grid">
+    <div id="modeCards">
+      <div class="mode-card" data-mode="Nominal" style="border-color:var(--border)">
+        <div class="top" style="background:var(--cyan)"></div>
+        <div class="head"><span class="name" style="color:var(--cyan)">Nominal</span><span class="trig">[t &lt; 10s]</span><span class="badge" style="background:var(--cyan)">IA</span></div>
+        <div class="desc">IA: micro-corrections — tracking GEO nominal</div>
+      </div>
+      <div class="mode-card" data-mode="Positionnement" style="border-color:var(--border)">
+        <div class="top" style="background:var(--green)"></div>
+        <div class="head"><span class="name" style="color:var(--green)">Positionnement</span><span class="trig">[t 10-20s]</span><span class="badge" style="background:var(--green)">IA</span></div>
+        <div class="desc">IA: GBR detecte perturbation — corrige en 50ms</div>
+      </div>
+      <div class="mode-card" data-mode="Protection" style="border-color:var(--border)">
+        <div class="top" style="background:var(--orange)"></div>
+        <div class="head"><span class="name" style="color:var(--orange)">Protection</span><span class="trig">[t &gt; 20s anomalie critique]</span><span class="badge" style="background:var(--orange)">IA</span></div>
+        <div class="desc">IA: arret moteur — sauvegarde — remise a zero</div>
+      </div>
+      <div class="mode-card" data-mode="Maintien" style="border-color:var(--border)">
+        <div class="top" style="background:var(--purple)"></div>
+        <div class="head"><span class="name" style="color:var(--purple)">HOLD REVERSE / CATCH</span><span class="trig">[t 23-37s]</span><span class="badge" style="background:var(--purple)">IA</span></div>
+        <div class="desc">IA: retour position + rattrapage vitesse</div>
+      </div>
+    </div>
+
+    <div class="chart-card sada">
+      <div class="top"></div>
+      <h5>Resultats IA — Angle Desire / Mesure / Correction</h5>
+      <div class="legend">
+        <div class="item"><span class="swatch" style="background:var(--green)"></span>Desire</div>
+        <div class="item"><span class="swatch" style="background:var(--orange)"></span>Mesure</div>
+        <div class="item"><span class="swatch" style="background:var(--cyan)"></span>Correction IA</div>
+        <div class="item"><span class="swatch" style="background:var(--red)"></span>Erreur avant</div>
+        <div class="item"><span class="swatch" style="background:var(--purple)"></span>Erreur apres</div>
+      </div>
+      <canvas id="sadaChart"></canvas>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ MISSION PLANNER PANEL ═══════════════ -->
+<div id="panelMission" class="panel">
+
+  <div class="panel-header">
+    <div class="bar green"></div>
+    <div><h2>Analyse Énergétique de Mission</h2></div>
+  </div>
+
+  <div class="params-bar">
+    <div class="top"></div>
+    <div class="params-grid">
+      <div class="field-group">
+        <label>Classe d'orbite</label>
+        <select id="pClass">
+          <option value="leo">LEO — Orbite Basse</option>
+          <option value="meo">MEO — Orbite moyenne</option>
+          <option value="geo">GEO — Orbite Géostationnaire</option>
+        </select>
+      </div>
+      <div class="field-group">
+        <label id="lblGeom">Geometrie LEO</label>
+        <select id="pGeom">
+          <option value="dawn_dusk">Crepusculaire (sync. soleil)</option>
+          <option value="noon_midnight">Midi-Minuit (sync. soleil)</option>
+          <option value="custom">Inclinaison personnalisee</option>
+        </select>
+      </div>
+      <div class="field-group"><label>Altitude LEO (km)</label><input type="number" id="pAlt" value="600"></div>
+      <div class="field-group"><label>Inclinaison (°)</label><input type="number" id="pIncl" value="97.5" disabled></div>
+      <div class="field-group"><label>Duree mission (ans)</label><input type="number" id="pYears" value="5"></div>
+      <div class="field-group"><label>Degradation (%/an)</label><input type="number" id="pDegrad" value="2.5"></div>
+      <div class="field-group"><button class="btn green" id="btnSimulate">▶ Simuler la mission</button></div>
+    </div>
+  </div>
+
+  <div class="kpi-mission-row">
+    <div class="kpi-mission" style="border-color:var(--green)"><div class="inner"><div class="lbl">Energie totale (IA)</div><div class="val" id="mEAi" style="color:var(--green)">—</div><div class="sub">kWh/kWc</div></div></div>
+    <div class="kpi-mission" style="border-color:var(--muted2)"><div class="inner"><div class="lbl">Energie totale (sans IA)</div><div class="val" id="mENoai" style="color:var(--muted2)">—</div><div class="sub">kWh/kWc</div></div></div>
+    <div class="kpi-mission" style="border-color:var(--cyan)"><div class="inner"><div class="lbl">Gain IA</div><div class="val" id="mGain" style="color:var(--cyan)">—</div><div class="sub">% recupere</div></div></div>
+    <div class="kpi-mission" style="border-color:var(--orange)"><div class="inner"><div class="lbl">Eclipse max</div><div class="val" id="mEcl" style="color:var(--orange)">—</div><div class="sub">% de l'orbite/jour</div></div></div>
+    <div class="kpi-mission" style="border-color:var(--purple)"><div class="inner"><div class="lbl">Periode orbitale</div><div class="val" id="mPeriod" style="color:var(--purple)">—</div><div class="sub">minutes</div></div></div>
+    <div class="kpi-mission" style="border-color:var(--gold)"><div class="inner"><div class="lbl">Erreur sans IA (simulee)</div><div class="val" id="mErr" style="color:var(--gold)">—</div><div class="sub">degres</div></div></div>
+  </div>
+
+  <div class="chart-card">
+    <div class="top"></div>
+    <h5>Energie cumulee sur la duree de vie — IA vs sans IA</h5>
+    <canvas id="missionChart"></canvas>
+  </div>
+
+  <p class="note">ℹ Modele analytique simplifie (ombre cylindrique, angle beta approxime) — usage de planification, non qualifie vol.</p>
+</div>
+
+<script>
+function showSection(key){
+  document.getElementById('panelSada').classList.toggle('active', key==='sada');
+  document.getElementById('panelMission').classList.toggle('active', key==='mission');
+  document.getElementById('tabSada').classList.toggle('active', key==='sada');
+  document.getElementById('tabMission').classList.toggle('active', key==='mission');
+}
+</script>
+<script src="{{ url_for('static', filename='js/sada.js') }}"></script>
+<script src="{{ url_for('static', filename='js/mission.js') }}"></script>
+</body>
+</html>
