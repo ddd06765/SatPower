@@ -156,7 +156,7 @@ function redraw(){
   drawLine(cumNoai, M.muted2, true);
 
   // legend
-  const legend = [['Avec correction IA', M.green, false], ['Sans correction (pointage libre)', M.muted2, true]];
+  const legend = [['Avec correction IA', M.green, false], ['Sans correction', M.muted2, true]];
   mctx.textAlign = 'left';
   mctx.font = '9px Segoe UI';
   legend.forEach((l, idx) => {
