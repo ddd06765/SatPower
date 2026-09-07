@@ -34,12 +34,24 @@ pGeom.addEventListener('change', onClassChange);
 
 function resizeMissionCanvas(){
   const rect = missionCanvas.getBoundingClientRect();
-  missionCanvas.width = Math.max(300, rect.width) * devicePixelRatio;
-  missionCanvas.height = Math.max(200, rect.height) * devicePixelRatio;
+  // Si le canvas est caché (onglet inactif), sa taille est 0x0 : on ne
+  // redimensionne pas dans ce cas pour eviter de figer le canvas en basse
+  // resolution. Le ResizeObserver se redeclenchera automatiquement des
+  // que le conteneur redevient visible avec sa vraie taille.
+  if (rect.width < 10 || rect.height < 10) return;
+
+  missionCanvas.width = Math.round(rect.width * devicePixelRatio);
+  missionCanvas.height = Math.round(rect.height * devicePixelRatio);
   mctx.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0);
   redraw();
 }
 window.addEventListener('resize', resizeMissionCanvas);
+
+// Redimensionne le canvas des qu'il redevient visible (ex: changement
+// d'onglet), pas seulement au resize de la fenetre — corrige le flou
+// du graphique quand le panneau Mission etait cache au chargement.
+const missionResizeObserver = new ResizeObserver(() => resizeMissionCanvas());
+missionResizeObserver.observe(missionCanvas.parentElement);
 
 async function runSimulation(){
   const payload = {
@@ -160,5 +172,4 @@ function redraw(){
 }
 
 onClassChange();
-resizeMissionCanvas();
 runSimulation();
