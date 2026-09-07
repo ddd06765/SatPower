@@ -10,9 +10,3 @@ services:
         generateValue: true
       - key: RENDER
         value: "1"
-      - key: SATPOWER_DATA_DIR
-        value: /opt/render/project/src/data
-    disk:
-      name: satpower-data
-      mountPath: /opt/render/project/src/data
-      sizeGB: 1
