@@ -6,6 +6,7 @@
 <title>SatPower — Dashboard</title>
 <link rel="icon" type="image/png" href="{{ url_for('static', filename='img/satpower_logo.png') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 </head>
 <body>
 
@@ -14,12 +15,12 @@
   <span class="brand">SatPower</span>
   <div class="spacer"></div>
   <span style="color:var(--muted2);font-size:12px;margin-right:14px;">{{ nom or email }}</span>
-  <a href="{{ url_for('logout') }}"><button class="btn ghost small">← Accueil</button></a>
+  <a href="{{ url_for('logout') }}"><button class="btn ghost small"><i class="fa-solid fa-arrow-left"></i> Accueil</button></a>
 </div>
 
 <div class="tabbar-section">
-  <button id="tabSada" class="active sada" onclick="showSection('sada')">🛰&nbsp; Simulation SADA</button>
-  <button id="tabMission" onclick="showSection('mission')">📊&nbsp; Analyse Énergétique de Mission</button>
+  <button id="tabSada" class="active sada" onclick="showSection('sada')"><i class="fa-solid fa-satellite"></i>&nbsp; Simulation SADA</button>
+  <button id="tabMission" onclick="showSection('mission')"><i class="fa-solid fa-chart-column"></i>&nbsp; Analyse Énergétique de Mission</button>
 </div>
 
 <!-- ═══════════════ SADA PANEL ═══════════════ -->
@@ -128,7 +129,7 @@
       <div class="field-group"><label>Inclinaison (°)</label><input type="number" id="pIncl" value="97.5" disabled></div>
       <div class="field-group"><label>Duree mission (ans)</label><input type="number" id="pYears" value="5"></div>
       <div class="field-group"><label>Degradation (%/an)</label><input type="number" id="pDegrad" value="2.5"></div>
-      <div class="field-group"><button class="btn green" id="btnSimulate">▶ Simuler la mission</button></div>
+      <div class="field-group"><button class="btn green" id="btnSimulate"><i class="fa-solid fa-play"></i> Simuler la mission</button></div>
     </div>
   </div>
 
